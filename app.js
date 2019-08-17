@@ -1,6 +1,5 @@
 const express = require("express");
 const app = express();
-const port = 3000;
 
 app.use(express.json());
 
@@ -8,12 +7,24 @@ let pokemons = [];
 pokemons.push(createPokemon("Charizard", "Fire"));
 pokemons.push(createPokemon("Mega Charizard X", "Fire"));
 
-app.get("/", (req, res) => res.send("Hello World!"));
-app.get("/pokemons", (req, res) => res.send(pokemons));
+app.get("/", (req, res) => res.send({ message: "Hello world" }));
+app.get("/pokemon", (req, res) => res.send(pokemons));
 
 app.get("/pokemon/:id", (req, res) => {
+  if (!isSufficientParam(req.params.id)) {
+    res.status(400).send({
+      error: "Insufficient parameters: id are required parameter"
+    });
+    return;
+  }
   let id = req.params.id;
   let p = pokemons[id - 1];
+  if (p === undefined ) {
+    res.status(400).send({
+      error: "Cannot find pokemon: Pokemon is not found"
+    });
+    return;
+  }
   res.send(p);
 });
 
@@ -59,7 +70,7 @@ app.delete("/pokemon/:id", (req, res) => {
   let id = req.params.id;
   if (id === undefined) {
     res.status(400).send({
-      error: "Cannot update pokemon: Pokemon is not found"
+      error: "Cannot delete pokemon: Pokemon is not found"
     });
     return;
   }
@@ -69,7 +80,7 @@ app.delete("/pokemon/:id", (req, res) => {
 });
 
 //CREATE
-app.post("/pokemons", (req, res) => {
+app.post("/pokemon", (req, res) => {
   if (!isSufficientParam(req.body.name) || !isSufficientParam(req.body.type)) {
     res.status(400).send({
       error: "Insufficient parameters: name and type are required parameter"
@@ -103,4 +114,5 @@ function createPokemon(name, type) {
   return p;
 }
 
-app.listen(port, () => console.log(`Example app listening no port ${port}`));
+module.exports = app
+
