@@ -17,7 +17,15 @@ app.get("/pokemon/:id", (req, res) => {
   res.send(p);
 });
 
+//UPDATE
 app.put("/pokemon/:id", (req, res) => {
+  if (!isSufficientParam(req.body.type2)) {
+    res.status(400).send({
+      error: "Insufficient parameters: type2 are required parameter"
+    });
+    return;
+  }
+
   let id = req.params.id;
   if (!isSufficientParam(id)) {
     res.status(400).send({
@@ -31,20 +39,36 @@ app.put("/pokemon/:id", (req, res) => {
     res.status(400).send({
       error: "Cannot update pokemon: Pokemon is not found"
     });
-  }
-
-  if (!isSufficientParam(req.body.type2)) {
-    res.status(400).send({
-      error: "Insufficient parameters: type2 are required parameter"
-    });
     return;
   }
 
   p.type2 = req.body.type2;
   pokemons[id - 1] = p;
-  res.sendStatus(201);
+  res.sendStatus(200);
 });
 
+// DELETE
+app.delete("/pokemon/:id", (req, res) => {
+  if (!isSufficientParam(req.params.id)) {
+    res.status(400).send({
+      error: "Insufficient parameters: id are required parameter"
+    });
+    return;
+  }
+
+  let id = req.params.id;
+  if (id === undefined) {
+    res.status(400).send({
+      error: "Cannot update pokemon: Pokemon is not found"
+    });
+    return;
+  }
+
+  delete pokemons[id - 1];
+  res.sendStatus(204);
+});
+
+//CREATE
 app.post("/pokemons", (req, res) => {
   if (!isSufficientParam(req.body.name) || !isSufficientParam(req.body.type)) {
     res.status(400).send({
